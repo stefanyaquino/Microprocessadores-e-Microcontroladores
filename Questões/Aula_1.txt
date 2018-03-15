@@ -1,0 +1,11 @@
+1- Sistema embarcado é um computador construído com um único propósito de aplicação.
+
+2- São microprocessadores que pode realizar armazenamento, processamento e controle de informações.
+
+3- Automotiva: segurança veicular; injeção eletrônica.
+   Eletrodomésticos:  máquina de lavar; DVD; SmartTv
+   Automação industrial: Qualidade do Produto Final; Velocidade de Produção; Segurança Operacional; Menores Perdas de Produção; Maior Preservação do Meio Ambiente.
+
+4- Arquitetura: x86 de 32 bits, x64 de 64 bits, ARMv7 (arquitetura muito utilizada em dispositivos móveis como aparelhos celulares, tablets, notebooks).
+
+5- O MSP430 tem um custo baixo, tem um bom desempenho para o aprendizado, utiliza linguagem c e assembly.

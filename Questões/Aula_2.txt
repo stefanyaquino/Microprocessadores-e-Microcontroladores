@@ -1,0 +1,28 @@
+1- Barramento é caminho feito entre duas unidades para receber ou transmitir informação e endereços representa exatamente a posição na memória para que se possa ler algum valor.
+
+2- A memoria Ram ela é volatil e quando acaba a energia ela perde a informação, já a memoria ROM quando acaba a energia ela guarda a informação, podendo ser reutilizada.
+
+3- 
+(a)  Ela é armazenada na memoria RAM, pois se o programa for deslgado perde a informação de i.
+(b)  É compilado na memoria ROM, pois você porerá reutilizar o código.
+
+4- Arquitetura tipo Harvard: Caminhos de dados e de instrução distintos, dessa forma, seus componentes internos também estão dispostos em lugares distintos, o que a torna mais rápida porem mais complexa.
+Von Neumann: é processada uma única informação por vez, visto que nessa tecnologia, execução e dados percorrem o mesmo barramento, o que torna a arquitetura mais simples porém torna o processo lento em relação à arquitetura Harvard. A principal diferença é que a arquitetura de Harvard separa o armazenamento e o trafego das instruções da CPU e dos dados em duas unidades distintas de memória, enquanto a Von Neumann utiliza o mesmo espaço de memória para ambos.
+
+
+5- 
+(a) Little-endian
+	0x200: 0xCD
+	0x202: 0xAB
+	0x204: 0x51
+	0x206: 0x80 
+(b) Big-endian
+	0x200: 0x80
+	0x202: 0x51
+	0x204: 0xAB
+	0x206: 0xCD 
+
+6- Verificando a flag de Overflow da própria CPU ou fazendo análise de sinal com a flag de negativo.
+
+
+
