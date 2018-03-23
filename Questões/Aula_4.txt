@@ -1,0 +1,51 @@
+1 -
+a) mov.w 0,R4;
+
+b) add.w R5,R5;
+
+c) sub.w R6,R6;
+
+d) add.w 2,R7;
+
+e) sub.w 2,R8;
+
+2-
+a) clr.w R4;
+
+b) inc.w R5;
+
+c) dec.w R6;
+
+d) incd.w R7;
+
+e) decd.w R8;
+
+3-
+a) add.w R4,R4;
+
+b) mov.w R5,R11;
+   add.w R5,R5;
+   add.w R11,R5;
+
+c) add.w R5,R5;
+   mov.w R5,R11;
+   add.w R11,R5;
+
+d) mov.w 0(R9), R11
+   add.w 2(R9), R11
+   mov.w R11,4(R9)
+
+e) mov.w R4, R11
+   add.w R11, R11
+   mov.w R6, R12
+   add.w R12, R12
+   add.w R12, R12
+   sub.w R12, R11
+   mov.w R11, 6(R9)
+
+f) mov.w R4, R11
+   mov.w R6, R12
+   add.w R12, R12
+   sub.w R12, R11
+   add.w R11, R11
+   mov.w R11, 6(R9)
