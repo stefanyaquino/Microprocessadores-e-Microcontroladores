@@ -1,0 +1,348 @@
+Para cada questão, escreva funções em C e/ou sub-rotinas na linguagem Assembly do MSP430. Reaproveite funções e sub-rotinas de uma questão em outra, se assim desejar. Leve em consideração que as sub-rotinas são utilizadas em um código maior, portanto utilize adequadamente os registradores R4 a R11. As instruções da linguagem Assembly do MSP430 se encontram ao final deste texto.
+
+1. (a) 
+	
+int Divisao(int dividendo,int divisor)
+{
+	if(dividendo >= divisor)
+	{
+		dividendo -= divisor;
+		return (1 + Divisao(dividendo,divisor));
+	}
+	else
+		return 0;
+}
+
+int Raiz_Quadrada(float s)
+{
+	float x=0;
+	do 
+	{
+		if(x==0)
+		{
+			x=Divisao(s,2);
+			x = Divisao((x + Divisao(s,x)),2);
+		}
+		else
+		{
+			x = Divisao((x + Divisao(s,x)),2);
+		}
+	}
+	while((x - Divisao((x + Divisao(s,x)),2)) > 1);
+	
+	return x;
+}
+
+
+(b) 
+divisao_unsigned: 
+        MOV #1,R13
+        CMP R14,R15 ; R15 = dividendo, R14 = divisor
+        JGE divisao_subtract ; if (R15 >= 14) go to Divisao_subtract
+        CLR.W R15 ; return 0 caso R15 seja menor que R14
+        RET
+divisao_subtract: 
+        SUB.W R14,R15 ; R15 = R15 - R14
+        PUSH.W R13 ; guarde 1 na pilha
+        CALL #divisao_unsigned ; 303
+        POP.W R14 ; recupere 1 na pilha
+        ADD.W R14,R15 ; return 1 + divisao(dividendo,divisor)
+        CLR.W R14; R14 = 0
+        CLR.W R13; R13 = 0
+        RET
+
+
+
+raiz_quadrada: 
+        MOV.W #0,R14 ; x = R14 = 0;
+iteracao: 
+        TST R14; R14 = 0 ?
+        JNE else_iteracao; se R14 != 0, vá pra else
+        PUSH R15 ; guardar R15 = s na pilha
+        MOV.W #2,R14 ; Nesse caso, ainda nao tem problema sobrescrever R14 porque ele é zero nesse momento
+        CALL #divisao_unsigned ; Faça Divisao(s,2)
+        MOV.W R15,R14 ; x =  Divisao(s,2)
+        POP R15 ; recupere S para R15, R15 = s
+        CALL #realizar_iteracao ; faça uma iteracao x = Divisao((x + Divisao(s,x)),2);
+        JMP condicao_while ; vá para a condicao do laço
+        
+realizar_iteracao: 
+        PUSH R15; guarde S na pilha
+        PUSH R14; guarde x na pilha
+        CALL #divisao_unsigned ; faça Divisao(s,x)
+        MOV.W R15,R13 ; R13 <= Divisao(s,x)
+        POP R14 ; recupere x da pilha
+        ADD.W R14,R13 ; faça R13 <= Divisao(s,x) + x
+        MOV.W R13,R15 ; faça R15 <= R13 <= Divisao(s,x) + x. Esta operacao foi realizada para fazer Divisao((x + Divisao(s,x)),2)
+        MOV #2,R14 ; R14 <= 2
+        CALL #divisao_unsigned
+        MOV R15,R14 ; R14 <= x <= Divisao((x + Divisao(s,x)),2)
+        POP R15 ; recupere s da pilha
+        RET
+        
+else_iteracao: 
+        CALL #realizar_iteracao
+
+condicao_while: 
+        PUSH R14 ; guarde x(n) na pilha
+        PUSH R14 ; guarde x(n) na pilha
+        CALL #realizar_iteracao
+        MOV.W R14,R13 ; R13 <= R14 <= Divisao(x + Divisao(s,x)),2)
+        POP R14 ; recupere x(n) da pilha
+        SUB.W R13,R14 ; faça R14 = x(n) - Divisao(x + Divisao(s,x)),2)
+        MOV.W R14,R13 ; faça R13 = R14
+        POP R14 ; recupere x(n) da pilha
+        CMP #1, R13 ; comparar R13 com 1
+        JGE iteracao ; R13 >= 1, vá para iteracao
+                
+fim_raiz_quadrada:
+        MOV.W R14,R15 ; R15 <= R14
+        CLR.W R14 
+        CLR.W R13
+        RET
+        
+
+2. 
+
+int MULT_signed(int a, int b)
+{
+	if(a<0 && b<0)
+	{
+		a = -a;
+		b = -b;
+		return MULT_unsigned(a,b);
+	}
+	else if (a<0 && b>0)
+	{
+		a = -a;
+		return -(MULT_unsigned(a,b));
+	}
+	else if (a>0 && b<0)
+	{
+		b = -b;
+		return -(MULT_unsigned(a,b));
+	}
+	else
+	{
+		return MULT_unsigned(a,b);
+	}
+
+}
+
+int MULT_unsigned(unsigned int a, unsigned int b)
+{
+if(b==0) return 0;
+else
+return a+MULT_unsigned(a, (b-1));
+}
+
+int Potencia(int x, int N)
+{
+	if(N==0) return 1;
+	else return MULT_signed(x,Potencia(x, (N-1)));
+}
+
+	
+
+
+
+3. Escreva uma sub-rotina na linguagem Assembly do MSP430 que calcula a divisão de 'a' por 'b', onde 'a', 'b' e o valor de saída são inteiros de 16 bits. 'a' e 'b' são fornecidos através dos registradores R15 e R14, respectivamente, e a saída deverá ser fornecida através do registrador R15.
+
+DIV_signed:
+        
+        PUSH    R15
+        RLA     R15                                             ; c recebe o sinal de a
+        JNC     Third_else_if_DIV_signed                       ; Pule se a>0
+        POP     R15
+        PUSH    R14
+        RLA     R14                                              ; c recebe o sinal de b
+        JNC     Second_else_if_DIV_signed                       ; Pule se b>0
+        POP     R14
+        INV     R15                                              ; realizando o complemento de 2
+        INC     R15                                              ; nas quatro instruções abaixo
+        INV     R14
+        INC     R14
+        CALL    #divisao_unsigned
+        CLR     R14
+        RET                                                      ; return divisao_unsigned(a,b)
+
+Second_else_if_DIV_signed:                                      ; a<0 mas b>0                        
+        POP     R14
+        INV     R15                                              ; realizando o comp.2 para a
+        INC     R15
+        CALL    #divisao_unsigned
+        INV     R15                                              ; realizando o comp. de 2 para
+        INC     R15                                              ; retornar -(divisao_unsigned(a,b))
+        CLR     R14
+        RET
+        
+Third_else_if_DIV_signed:                                       ; a>0 mas b<0 ?
+        POP     R15
+        PUSH    R14
+        RLA     R14                                              ; c recebe o sinal de b
+        JNC     else_DIV_signed                                ; Pule se b>0
+        POP     R14
+        INV     R14                                              ; realizando o complemento de 2
+        INC     R14                                              ; para b
+        CALL    #divisao_unsigned
+        INV     R15                                              ; realizando o comp. de 2 para
+        INC     R15                                              ; retornar -(divisao_unsigned(a,b))
+        CLR     R14
+        RET
+        
+else_DIV_signed:
+        POP     R14
+        CALL    #divisao_unsigned                                ; return divisao_unsigned(a,b)
+        CLR     R14
+        RET
+
+
+
+divisao_unsigned: 
+        MOV #1,R13
+        CMP R14,R15             ; R15 = dividendo, R14 = divisor
+        JGE divisao_subtract    ; if (R15 >= 14) go to Divisao_subtract
+        CLR.W R15               ; return 0 caso R15 seja menor que R14
+        RET
+        
+divisao_subtract: 
+        SUB.W R14,R15           ; R15 = R15 - R14
+        PUSH.W R13              ; guarde 1 na pilha
+        CALL #divisao_unsigned  ; 303
+        POP.W R14               ; recupere 1 na pilha
+        ADD.W R14,R15           ; return 1 + divisao(dividendo,divisor)
+        CLR.W R14               ; R14 = 0
+        CLR.W R13               ; R13 = 0
+        RET
+        
+
+
+4. Escreva uma sub-rotina na linguagem Assembly do MSP430 que calcula o resto da divisão de 'a' por 'b', onde 'a', 'b' e o valor de saída são inteiros de 16 bits. 'a' e 'b' são fornecidos através dos registradores R15 e R14, respectivamente, e a saída deverá ser fornecida através do registrador R15.
+
+Em C:
+
+int Remainder (int dividend,int divisor)
+{
+	while (dividend >= divisor)
+	{
+		dividend -= divisor;
+	}
+	
+	return dividend;
+}
+
+Em Assembly para msp 430:
+
+remainder:
+        CMP R14,R15                     
+        JL remainder_finish             ; R15 < R14 vá para finish
+        SUB.W R14,R15                   ; R15 <= R15 - R14
+        JMP remainder
+        
+remainder_finish:
+        RET
+
+5. (a) Escreva uma função em C que indica a primalidade de uma variável inteira sem sinal, retornando o valor 1 se o número for primo, e 0, caso contrário. Siga o seguinte protótipo:
+
+	int Primalidade(unsigned int x);
+
+int Remainder (int dividend,int divisor)
+{
+	while (dividend >= divisor)
+	{
+		dividend -= divisor;
+	}
+	
+	return dividend;
+}
+
+int Primalidade (int a)
+{
+	int i=3;
+	/*Se a for 1 ele não é primo.*/
+	if (a==1)
+	{
+		return 0;
+	}
+	else if (a==2)
+	{
+		return 1;
+	}
+	/*Se a divisão de a por 2 der zero o número é PAR e não é primo.*/
+	else if (Remainder(a,2)==0) 
+	{
+		return 0;
+	}
+	/*Saia verificando a com todos os outros números. Se a for divisível por i ele não é primo. Vá verificando até que i = a - 1. 
+	se i chegar a ser igual a i = a - 1, o número é primo.	
+	*/
+	else
+	{
+		while(Remainder(a,i)!=0 && i<a)
+		{
+			i+=2;
+		}
+		/*A condição a seguir verifica porquê o laço acabou.*/
+		if(i==a)
+		{
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	
+}
+
+(b) Escreva a sub-rotina equivalente na linguagem Assembly do MSP430. A variável de entrada é fornecida pelo registrador R15, e o valor de saída também.
+
+Primalidade:
+        TST     R15                     ; R15 == 0?
+        JEQ     Nao_primo               
+        CMP     #1,R15                  ; R15 == 1?
+        JEQ     Nao_primo
+        CMP     #2,R15                  ; R15 == 2?
+        JEQ     E_primo
+        MOV.W   #3,R14                  ; R14 = i = 3
+While_verificar:
+        CMP     R14,R15
+        JEQ     E_primo                 ; E' primo se a==i
+        PUSH    R14                     ; Guarde R14 na pilha
+        PUSH    R15                     ; Guarde R15 na pilha
+        CALL    #remainder              ; Faça a%i
+        TST     R15
+        JEQ     Nao_primo_2             ; R15 == a%i == 0?
+        POP     R15                     ; Recupere R15
+        POP     R14                     ; Recupere R14
+        ADD.W   #2,R14                  ; i += 2
+        JMP     While_verificar
+Nao_primo:
+        MOV.W   #0,R15                  ; return 0
+        CLR.W   R14
+        RET
+
+Nao_primo_2:
+        POP     R15
+        POP     R15
+        MOV.W   #0,R15                  ; return 0
+        CLR.W   R14
+        RET
+E_primo
+        MOV.W   #1,R15                  ; return 1
+        CLR.W   R14
+        RET
+
+remainder:
+        CMP     R14,R15                     
+        JL      remainder_finish         ; R15 < R14 vá para finish
+        SUB.W   R14,R15                  ; R15 <= R15 - R14
+        JMP     remainder
+        
+remainder_finish:
+        RET
+        
+        END
+
+
+

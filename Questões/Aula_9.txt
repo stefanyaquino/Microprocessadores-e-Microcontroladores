@@ -1,0 +1,91 @@
+1-
+void Atraso(volatile unsigned int x)
+{
+	int i = 0; 
+	TA0CCR0 = 1000 - 1;
+	TA0CTL = TASSEL_2 + ID_0 + MC_1;
+
+	while (i<x)
+	{
+		while ((TA0CTL & TAIFG) == 0); 
+		TA0CTL &= ~TAIFG;
+		i++;
+	}
+
+	TA0CTL = MC_0;
+
+}
+
+int Debounce(int pin)
+{
+	while (P1IN & pin != 0); 
+	Atraso(10);		
+	return P1IN & pin;
+}
+
+2-
+#include <msp430g2533.h>
+#include <legacymsp430.h>
+
+
+#define SetOut(pin)		 (P1DIR |= pin)
+#define SetIn(pin)		 (P1DIR &= ~pin)
+#define SetPullUp(pin)	 (P1REN |= pin)
+#define SetPullDown(pin) (P1REN &= ~pin)
+#define SetHigh(pin)	 (P1OUT |= pin)
+#define SetLow(pin)		 (P1OUT &= ~pin)
+#define SwitchValue(pin) (P1OUT ^= pin)
+
+byte X[] = { BIT0, BIT1, BIT2 }; // Coluna
+byte Y[] = { BIT3, BIT4, BIT5 }; // Linha
+
+void SetupX(byte dir)
+{
+	int i;
+	for (i = 0; i < 3; i++)
+	{
+		if (dir)
+		{
+			SetOut(X[i]);
+			SetPullDown(X[i]);
+			SetLow(X[i]);
+		}
+		else
+		{
+			SetIn(X[i]);
+			SetPullUp(X[i]);
+			
+		}
+	}
+}
+
+// dir = 0, entrada.
+// dir = 1, saída.
+void SetupY(byte dir)
+{
+	int i;
+	for (i = 0; i < 3; i++)
+	{
+		if (dir)
+		{
+			SetOut(Y[i]);
+			SetPullDown(Y[i]);
+			SetLow(Y[i]);
+		}
+		else
+		{
+			SetIn(Y[i]);
+			SetPullUp(Y[i]);
+		}
+	}
+}
+
+
+
+int main()
+{
+	WDTCTL = WDTPW | WDTHOLD; // Stop Watchdog Timer
+
+	return 0;
+}
+

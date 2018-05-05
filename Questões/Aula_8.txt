@@ -1,0 +1,160 @@
+
+
+1-
+
+#define LED1 BIT0
+#define LED2 BIT6
+#define LEDS (LED2|LED1)
+
+#define SetOut(pin)	 (P1DIR |= pin)
+#define SetHigh(pin)	 (P1OUT |= pin)
+#define SetLow(pin)	 (P1OUT &= ~pin)
+#define SwitchValue(pin) (P1OUT ^= pin)
+int main()
+{
+	WDTCTL = WDTHOLD | WDTPW;	// Desabilitar o WatchDog Timer
+	SetOut(LEDS); //P1DIR |= LEDS;
+	SetHigh(LED2); //P1OUT |= LED2;				// Liga LED2
+	SetLow(LED1); //P1OUT &= ~LED1;				// Desliga LED1
+	for (;;)
+	{
+		SwitchValue(LED2 | LED1); // P1OUT ^= (LED2 | LED1);
+	}
+	return 0;
+}
+
+2-
+
+#define LED1 BIT0
+#define LED2 BIT6
+#define LEDS (LED2|LED1)
+
+#define SetOut(pin)	 (P1DIR |= pin)
+#define SetHigh(pin)	 (P1OUT |= pin)
+#define SetLow(pin)	 (P1OUT &= ~pin)
+#define SwitchValue(pin) (P1OUT ^= pin)
+int main()
+{
+	WDTCTL = WDTHOLD | WDTPW;	// Desabilitar o WatchDog Timer
+	SetOut(LEDS); //P1DIR |= LEDS;
+	for (;;)
+	{
+		SetHigh(LED2);
+		SetLow(LED1);
+		
+		SetHigh(LED2);
+		SetLow(LED1);
+
+		SetHigh(LED1);
+		SetLow(LED2);
+
+		SetHigh(LED1);
+		SetLow(LED2);
+	}
+	return 0;
+}
+
+
+3-
+
+#include <msp430g2533.h>
+#define LED1 BIT0
+#define LED2 BIT6
+#define LEDS (LED2|LED1)
+#define BTN BIT2
+
+#define SetOut(pin)		 (P1DIR |= pin)
+#define SetIn(pin)		 (P1DIR &= ~pin)
+#define SetPullUp(pin)	 (P1REN |= pin)
+#define SetPullDown(pin) (P1REN &= ~pin)
+#define SetHigh(pin)	 (P1OUT |= pin)
+#define SetLow(pin)		 (P1OUT &= ~pin)
+#define SwitchValue(pin) (P1OUT ^= pin)
+
+int main()
+{
+	WDTCTL = WDTHOLD | WDTPW;	// Desabilitar o WatchDog Timer
+	SetOut(LEDS); //P1DIR |= LEDS;
+	SetIn(BTN);
+	SetPullUp(BTN);
+	for (;;)
+	{
+		if (P1IN & BTN == 0)
+			SetHigh(LEDS);
+		else
+			SetLow(LEDS);
+	}
+	return 0;
+}
+
+4-
+
+#include <msp430g2533.h>
+#define LED1 BIT0
+#define LED2 BIT6
+#define LEDS (LED2|LED1)
+#define BTN BIT2
+
+#define SetOut(pin)		 (P1DIR |= pin)
+#define SetIn(pin)		 (P1DIR &= ~pin)
+#define SetPullUp(pin)	 (P1REN |= pin)
+#define SetPullDown(pin) (P1REN &= ~pin)
+#define SetHigh(pin)	 (P1OUT |= pin)
+#define SetLow(pin)		 (P1OUT &= ~pin)
+#define SwitchValue(pin) (P1OUT ^= pin)
+
+int main()
+{
+	WDTCTL = WDTHOLD | WDTPW;	// Desabilitar o WatchDog Timer
+	SetOut(LEDS); //P1DIR |= LEDS;
+	SetHigh(LED1);
+	SetLow(LED2);
+	SetIn(BTN);
+	SetPullUp(BTN);
+	for (;;)
+	{
+		if (P1IN & BTN == 0)
+			SwitchValue(LEDS);
+		else
+			SetLow(LEDS);
+	}
+	return 0;
+}
+
+5-
+
+#include <msp430g2533.h>
+#include <legacymsp430.h>
+#define LED1 BIT0
+#define LED2 BIT6
+#define LEDS (LED2|LED1)
+#define BTN BIT2
+
+#define SetOut(pin)		 (P1DIR |= pin)
+#define SetIn(pin)		 (P1DIR &= ~pin)
+#define SetPullUp(pin)	 (P1REN |= pin)
+#define SetPullDown(pin) (P1REN &= ~pin)
+#define SetHigh(pin)	 (P1OUT |= pin)
+#define SetLow(pin)		 (P1OUT &= ~pin)
+#define SwitchValue(pin) (P1OUT ^= pin)
+
+int main()
+{
+	WDTCTL = WDTHOLD | WDTPW;	// Desabilitar o WatchDog Timer
+	SetOut(LEDS); //P1DIR |= LEDS;
+	SetIn(BTN);
+	SetPullUp(BTN);
+
+	P1IE |= BTN; // Enable interrupt
+	P1IES |= BTN; // Falling edge
+	_BIS_SR(LPM0 + GIE);
+	return 0;
+}
+
+interrupt(PORT1_VECTOR) Interrupcao_P1()
+{
+	SetHigh(LEDS);
+	while (P1IN&BTN == 0);	// Permanecer aqui até que o botão seja solto
+	SetLow(LEDS);
+	P1IFG &= ~BTN;	// Zerar flag de interrupção do BTN
+}
