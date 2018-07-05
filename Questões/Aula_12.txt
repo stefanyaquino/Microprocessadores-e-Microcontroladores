@@ -1,0 +1,18 @@
+1 - V, F, V, F
+2- n
+3- -, V, F (1000Hz), F(MC_1)
+4-F (se o botao mudar ele sai), F (borda de descida P1dir &= ~BTN), V, V
+5- V (Outmod_7), F, F(a terceira nao), F(polo positivo, resistor tipo pull-up),F (o led n pisca), V
+6-
+7-V, V, F, F(n o 0), V
+8- d1= 15
+d2 = 73
+
+f = 10*73+1000 = 1730
+C = 0,75 = 75%
+
+1000000/TACCR0*8 = 1730
+
+TACCR0 = 72,25
+
+TACCR1= 72 * 75/100 = 54

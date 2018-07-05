@@ -1,0 +1,130 @@
+Para todas as questões abaixo, utilize o modo de comparação do Timer A.
+
+Para os itens abaixo, confira a diferença no brilho do LED. (a) Pisque o LED no pino P1.6 numa frequência de 100 Hz e ciclo de trabalho de 25%.
+#include<msp430g2553.h>
+#define LED BIT6
+#define PERIODO 10000
+#define DUTY_CICLE 2500
+
+int main(void)
+{
+	WDTCTL = WDTPW + WDTHOLD;
+	BCSCTL1 = CALBC1_1MHZ;
+	DCOCTL = CALDCO_1MHZ;
+	P1DIR |= LED;
+	P1SEL |= LED;
+	P1SEL2 &= ~LED;
+	TACCR0 = PERIODO-1;
+	TACCR1 = DUTY_CICLE-1; // ciclo em que o led permanece ativo
+	TACCTL1 = OUTMOD_7;
+	TACTL = TASSEL_2 + ID_0 + MC_1; // SMCLK Utilizado , dividido por 1, contagem completa
+	_BIS_SR(LPM0_bits);
+	return 0;
+}
+(b) Pisque o LED no pino P1.6 numa frequência de 100 Hz e ciclo de trabalho de 50%.
+
+#include<msp430g2553.h>
+#define LED BIT6
+#define PERIODO 10000
+#define DUTY_CICLE 5000
+
+int main(void)
+{
+	WDTCTL = WDTPW + WDTHOLD;
+	BCSCTL1 = CALBC1_1MHZ;
+	DCOCTL = CALDCO_1MHZ;
+	P1DIR |= LED;
+	P1SEL |= LED;
+	P1SEL2 &= ~LED;
+	TACCR0 = PERIODO-1;
+	TACCR1 = DUTY_CICLE-1;
+	TACCTL1 = OUTMOD_7;
+	TACTL = TASSEL_2 + ID_0 + MC_1; //idem questao a
+	_BIS_SR(LPM0_bits);
+	return 0;
+}
+(c) Pisque o LED no pino P1.6 numa frequência de 100 Hz e ciclo de trabalho de 75%.
+
+#include<msp430g2553.h>
+#define LED BIT6
+#define PERIODO 10000
+#define DUTY_CICLE 7500
+
+int main(void)
+{
+	WDTCTL = WDTPW + WDTHOLD;
+	BCSCTL1 = CALBC1_1MHZ;
+	DCOCTL = CALDCO_1MHZ;
+	P1DIR |= LED;
+	P1SEL |= LED;
+	P1SEL2 &= ~LED;
+	TACCR0 = PERIODO-1;
+	TACCR1 = DUTY_CICLE-1;
+	TACCTL1 = OUTMOD_7;
+	TACTL = TASSEL_2 + ID_0 + MC_1; // idem questao a
+	_BIS_SR(LPM0_bits);
+	return 0;
+}
+Pisque o LED no pino P1.6 numa frequência de 1 Hz e ciclo de trabalho de 25%.
+#include<msp430g2553.h>
+#define LED BIT6
+#define PERIODO 62500
+#define DUTY_CICLE 15625
+
+int main(void)
+{
+	WDTCTL = WDTPW + WDTHOLD;
+	BCSCTL1 = CALBC1_1MHZ;
+	DCOCTL = CALDCO_1MHZ;
+	P1DIR |= LED;
+	P1SEL |= LED;
+	P1SEL2 &= ~LED;
+	TACCR0 = PERIODO-1;
+	TACCR1 = DUTY_CICLE-1;
+	TACCTL1 = OUTMOD_7;
+	TACTL = TASSEL_2 + ID_3 + MC_3;
+	_BIS_SR(LPM0_bits);
+	return 0;
+}
+Pisque o LED no pino P1.6 numa frequência de 1 Hz e ciclo de trabalho de 50%.
+#include<msp430g2553.h>
+#define LED BIT6
+#define PERIODO 62500
+#define DUTY_CICLE 31250 // 50% de 62500
+
+int main(void)
+{
+	WDTCTL = WDTPW + WDTHOLD;
+	BCSCTL1 = CALBC1_1MHZ;
+	DCOCTL = CALDCO_1MHZ;
+	P1DIR |= LED;
+	P1SEL |= LED;
+	P1SEL2 &= ~LED;
+	TACCR0 = PERIODO-1;
+	TACCR1 = DUTY_CICLE-1;
+	TACCTL1 = OUTMOD_7;
+	TACTL = TASSEL_2 + ID_3 + MC_3; // 1000000/(8*2) = 62500 , 62500/62500 = 1
+	_BIS_SR(LPM0_bits);
+	return 0;
+}
+Pisque o LED no pino P1.6 numa frequência de 1 Hz e ciclo de trabalho de 75%.
+#include<msp430g2553.h>
+#define LED BIT6
+#define PERIODO 62500
+#define DUTY_CICLE 46875
+
+int main(void)
+{
+	WDTCTL = WDTPW + WDTHOLD;
+	BCSCTL1 = CALBC1_1MHZ;
+	DCOCTL = CALDCO_1MHZ;
+	P1DIR |= LED;
+	P1SEL |= LED;
+	P1SEL2 &= ~LED;
+	TACCR0 = PERIODO-1;
+	TACCR1 = DUTY_CICLE-1;
+	TACCTL1 = OUTMOD_7;
+	TACTL = TASSEL_2 + ID_3 + MC_3;
+	_BIS_SR(LPM0_bits);
+	return 0;
+}
